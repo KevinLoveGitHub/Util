@@ -44,3 +44,8 @@ artifacts {
     archives javadocJar
 }
 
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+}
+
