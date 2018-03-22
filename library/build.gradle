@@ -4,6 +4,7 @@ group='com.github.KevinLoveGitHub'
 
 android {
     compileSdkVersion 26
+    buildToolsVersion "26.0.2"
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 26
