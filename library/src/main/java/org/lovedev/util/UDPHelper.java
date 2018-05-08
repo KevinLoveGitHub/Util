@@ -44,7 +44,7 @@ public class UDPHelper {
     }
 
 
-    public static void openUDPPort(final int port) {
+    public static void openUDPPort(final int port, final UDPMessageListener listener) {
         ExecutorHelpers.getNetworkIO().execute(new Runnable() {
             DatagramSocket mDatagramSocket;
 
@@ -69,12 +69,20 @@ public class UDPHelper {
                         mDatagramSocket.receive(inPacket);
                         String msg = new String(inBuff, 0, inPacket.getLength());
                         LogUtils.i(TAG, msg);
+                        listener.onMessageArrived(msg);
                     }
                 } catch (IOException e) {
                     LogUtils.d(TAG, "receive message: " + e.getMessage());
+                    listener.onError(e);
                 }
             }
         });
-
     }
+
+    public interface UDPMessageListener {
+        void onMessageArrived(String message);
+
+        void onError(Exception e);
+    }
+
 }
