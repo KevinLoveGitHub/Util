@@ -52,27 +52,29 @@ public class FTPUtils {
     /**
      * 设置FTP服务器
      *
-     * @param FTPUrl       FTP服务器ip地址
-     * @param FTPPort      FTP服务器端口号
-     * @param UserName     登陆FTP服务器的账号
-     * @param UserPassword 登陆FTP服务器的密码
+     * @param workingDirectory 工作空间
+     * @param ftpUrl       FTP服务器ip地址
+     * @param ftpPort      FTP服务器端口号
+     * @param userName     登陆FTP服务器的账号
+     * @param userPassword 登陆FTP服务器的密码
      * @return 是否设置成功
      */
-    public boolean initFTPSetting(String FTPUrl, int FTPPort, String UserName, String UserPassword) {
-        this.FTPUrl = FTPUrl;
-        this.FTPPort = FTPPort;
-        this.UserName = UserName;
-        this.UserPassword = UserPassword;
+    public boolean initFTPSetting(String workingDirectory, String ftpUrl, int ftpPort, String userName, String userPassword) {
+        this.workingDirectory = workingDirectory;
+        this.FTPUrl = ftpUrl;
+        this.FTPPort = ftpPort;
+        this.UserName = userName;
+        this.UserPassword = userPassword;
         ftpClient = new FTPClient();
 
         int reply;
 
         try {
             //1.要连接的FTP服务器Url,Port
-            ftpClient.connect(FTPUrl, FTPPort);
+            ftpClient.connect(ftpUrl, ftpPort);
 
             //2.登陆FTP服务器
-            ftpClient.login(UserName, UserPassword);
+            ftpClient.login(userName, userPassword);
 
             //3.看返回的值是不是230，如果是，表示登陆成功
             reply = ftpClient.getReplyCode();
@@ -107,7 +109,7 @@ public class FTPUtils {
             throw new NullPointerException("please call initFTPSetting() first");
         }
         if (!ftpClient.isConnected()) {
-            if (!initFTPSetting(FTPUrl, FTPPort, UserName, UserPassword)) {
+            if (!initFTPSetting(workingDirectory, FTPUrl, FTPPort, UserName, UserPassword)) {
                 return false;
             }
         }
@@ -154,7 +156,7 @@ public class FTPUtils {
             throw new NullPointerException("please call initFTPSetting() first");
         }
         if (!ftpClient.isConnected()) {
-            if (!initFTPSetting(FTPUrl, FTPPort, UserName, UserPassword)) {
+            if (!initFTPSetting(workingDirectory, FTPUrl, FTPPort, UserName, UserPassword)) {
                 return false;
             }
         }
