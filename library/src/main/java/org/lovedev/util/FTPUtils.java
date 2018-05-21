@@ -34,23 +34,19 @@ public class FTPUtils {
     private String UserPassword;
     private String workingDirectory = "log";
 
-    private FTPUtils() {
-        ftpClient = new FTPClient();
-    }
 
     /**
      * 得到类对象实例（因为只能有一个这样的类对象，所以用单例模式）
      */
-    public static FTPUtils getInstance() {
+    private static class FTPUtilsHolder {
+        private static final FTPUtils INSTANCE = new FTPUtils();
+    }
 
-        if (instance == null) {
-            synchronized (FTPUtils.class) {
-                if (instance == null) {
-                    instance = new FTPUtils();
-                }
-            }
-        }
-        return instance;
+    public static FTPUtils getInstance() {
+        return FTPUtilsHolder.INSTANCE;
+    }
+
+    private FTPUtils() {
     }
 
     /**
@@ -67,6 +63,7 @@ public class FTPUtils {
         this.FTPPort = FTPPort;
         this.UserName = UserName;
         this.UserPassword = UserPassword;
+        ftpClient = new FTPClient();
 
         int reply;
 
@@ -97,14 +94,18 @@ public class FTPUtils {
         }
     }
 
+
     /**
      * 上传文件
      *
-     * @param FilePath 要上传文件所在SDCard的路径
-     * @param FileName 要上传的文件的文件名(如：Sim唯一标识码)
+     * @param filePath 要上传文件所在SDCard的路径
+     * @param fileName 要上传的文件的文件名(如：Sim唯一标识码)
      * @return true为成功，false为失败
      */
-    public boolean uploadFile(String FilePath, String FileName) {
+    public boolean uploadFile(String filePath, String fileName) {
+        if (ftpClient == null) {
+            throw new NullPointerException("please call initFTPSetting() first");
+        }
         if (!ftpClient.isConnected()) {
             if (!initFTPSetting(FTPUrl, FTPPort, UserName, UserPassword)) {
                 return false;
@@ -124,8 +125,8 @@ public class FTPUtils {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
             //文件上传吧～
-            FileInputStream fileInputStream = new FileInputStream(FilePath);
-            ftpClient.storeFile(FileName, fileInputStream);
+            FileInputStream fileInputStream = new FileInputStream(filePath);
+            ftpClient.storeFile(fileName, fileInputStream);
 
             //关闭文件流
             fileInputStream.close();
@@ -149,7 +150,9 @@ public class FTPUtils {
      * @return true为成功，false为失败
      */
     public boolean downLoadFile(String filePath, String fileName) throws IOException {
-
+        if (ftpClient == null) {
+            throw new NullPointerException("please call initFTPSetting() first");
+        }
         if (!ftpClient.isConnected()) {
             if (!initFTPSetting(FTPUrl, FTPPort, UserName, UserPassword)) {
                 return false;
@@ -199,6 +202,9 @@ public class FTPUtils {
      * @throws IOException    IO 操作异常
      */
     public String readFile(String fileName) throws ParseException, IOException {
+        if (ftpClient == null) {
+            throw new NullPointerException("please call initFTPSetting() first");
+        }
         String code = "GBK";
         InputStream ins = null;
         StringBuilder builder = null;
