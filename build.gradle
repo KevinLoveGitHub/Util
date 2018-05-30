@@ -25,3 +25,60 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext.a = 'a'
+ext.b = [1,2,3]
+ext.c = [:]
+c.a = 'c.a'
+c.b = 'c.b'
+
+
+
+task helloDelegate << {
+    new Delegate().test {
+        println "thisObject:${thisObject.getClass()}"
+        println "owner:${owner.getClass()}"
+        println "delegate:${delegate.getClass()}"
+        method1()
+        it.method1()
+    }
+}
+
+def method1(){
+    println "Context this:${this.getClass()} in root"
+    println "method1 in root"
+}
+class Delegate {
+    def method1(){
+        println "Delegate this:${this.getClass()} in Delegate"
+        println "method1 in Delegate"
+    }
+
+    def test(Closure<Delegate> closure){
+        closure(this)
+    }
+}
+
+task getValue << {
+    println "Local variable is $value"
+}
+
+// command: gradle -q -DsystemValue=hello getSystemValue
+// output: hello
+task getSystemValue << {
+    println System.getProperty("helloWorld")
+}
+
+// command: gradle -q -PcommandValue=hello2 getCommandValue
+// output: hello2
+task getCommandValue << {
+    println commandValue
+}
+
+// command:
+// export ORG_GRADLE_PROJECT_value=kevin
+// gradle -q getSystemValue2
+// output: kevin
+task getSystemValue2 << {
+    println value
+}

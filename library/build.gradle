@@ -19,3 +19,17 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation files('libs/commons-net-3.6-ftp.jar')
 }
+
+task getConfigurationByName << {
+    println configurations.getByName('implementation').allDependencies.each {
+        if (it instanceof ExternalModuleDependency) {
+            println it.targetConfiguration
+        }
+    }
+}
+
+//def value = 'kevin'
+
+task getValue << {
+    println "Local variable is $value, Global variable is $c.a"
+}
