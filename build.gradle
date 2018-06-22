@@ -82,3 +82,19 @@ task getCommandValue << {
 task getSystemValue2 << {
     println value
 }
+
+task getOtherScriptValue << {
+    println otherValue
+}
+
+task testLog << {
+    logger.info("i'm log")
+}
+
+task printProps << {
+    println commandLineProjectProp
+    println gradlePropertiesProp
+    println systemProjectProp
+    println envProjectProp
+    println System.properties['system']
+}
