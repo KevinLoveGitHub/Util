@@ -1,317 +1,276 @@
-package org.lovedev.util;
+package org.lovedev.webrtc;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.widget.Toast;
+import android.support.v4.content.ContextCompat;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 /**
  * 申请权限工具类代码
  */
 public class PermissionUtils {
 
-    private static final String TAG = PermissionUtils.class.getSimpleName();
-    public static final int CODE_RECORD_AUDIO = 0;
-    public static final int CODE_GET_ACCOUNTS = 1;
-    public static final int CODE_READ_PHONE_STATE = 2;
-    public static final int CODE_CALL_PHONE = 3;
-    public static final int CODE_CAMERA = 4;
-    public static final int CODE_ACCESS_FINE_LOCATION = 5;
-    public static final int CODE_ACCESS_COARSE_LOCATION = 6;
-    public static final int CODE_READ_EXTERNAL_STORAGE = 7;
-    public static final int CODE_WRITE_EXTERNAL_STORAGE = 8;
-    public static final int CODE_MULTI_PERMISSION = 100;
-
-    public static final String PERMISSION_RECORD_AUDIO = Manifest.permission.RECORD_AUDIO;
-    public static final String PERMISSION_GET_ACCOUNTS = Manifest.permission.GET_ACCOUNTS;
-    public static final String PERMISSION_READ_PHONE_STATE = Manifest.permission.READ_PHONE_STATE;
-    public static final String PERMISSION_CALL_PHONE = Manifest.permission.CALL_PHONE;
-    public static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
-    public static final String PERMISSION_ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    public static final String PERMISSION_ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    public static final String PERMISSION_READ_EXTERNAL_STORAGE = Manifest.permission.READ_EXTERNAL_STORAGE;
-    public static final String PERMISSION_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-
-    private static final String[] requestPermissions = {
-            PERMISSION_RECORD_AUDIO,
-            PERMISSION_GET_ACCOUNTS,
-            PERMISSION_READ_PHONE_STATE,
-            PERMISSION_CALL_PHONE,
-            PERMISSION_CAMERA,
-            PERMISSION_ACCESS_FINE_LOCATION,
-            PERMISSION_ACCESS_COARSE_LOCATION,
-            PERMISSION_READ_EXTERNAL_STORAGE,
-            PERMISSION_WRITE_EXTERNAL_STORAGE
-    };
-
-    interface PermissionGrant {
-        void onPermissionGranted(int requestCode);
-    }
-
     /**
-     * Requests permission.
+     * 检测权限
      *
-     * @param activity
-     * @param requestCode request code, e.g. if you need request CAMERA permission,parameters is PermissionUtils.CODE_CAMERA
+     * @return true：已授权； false：未授权；
      */
-    public static void requestPermission(final Activity activity, final int requestCode, PermissionGrant permissionGrant) {
-        if (activity == null) {
-            return;
-        }
-
-        Log.i(TAG, "requestPermission requestCode:" + requestCode);
-        if (requestCode < 0 || requestCode >= requestPermissions.length) {
-            Log.w(TAG, "requestPermission illegal requestCode:" + requestCode);
-            return;
-        }
-
-        final String requestPermission = requestPermissions[requestCode];
-
-        //如果是6.0以下的手机，ActivityCompat.checkSelfPermission()会始终等于PERMISSION_GRANTED，
-        // 但是，如果用户关闭了你申请的权限，ActivityCompat.checkSelfPermission(),会导致程序崩溃(java.lang.RuntimeException: Unknown exception code: 1 msg null)，
-        // 你可以使用try{}catch(){},处理异常，也可以在这个地方，低于23就什么都不做，
-        // 个人建议try{}catch(){}单独处理，提示用户开启权限。
-//        if (Build.VERSION.SDK_INT < 23) {
-//            return;
-//        }
-
-        int checkSelfPermission;
-        try {
-            checkSelfPermission = ActivityCompat.checkSelfPermission(activity, requestPermission);
-        } catch (RuntimeException e) {
-            Toast.makeText(activity, "please open this permission", Toast.LENGTH_SHORT)
-                    .show();
-            Log.e(TAG, "RuntimeException:" + e.getMessage());
-            return;
-        }
-
-        if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "ActivityCompat.checkSelfPermission != PackageManager.PERMISSION_GRANTED");
-
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, requestPermission)) {
-                Log.i(TAG, "requestPermission shouldShowRequestPermissionRationale");
-                shouldShowRationale(activity, requestCode, requestPermission);
-
-            } else {
-                Log.d(TAG, "requestCameraPermission else");
-                ActivityCompat.requestPermissions(activity, new String[]{requestPermission}, requestCode);
-            }
-
+    public static boolean checkPermission(Context context, String permission) {
+        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+            return true;
         } else {
-            Log.d(TAG, "ActivityCompat.checkSelfPermission ==== PackageManager.PERMISSION_GRANTED");
-            Toast.makeText(activity, "opened:" + requestPermissions[requestCode], Toast.LENGTH_SHORT).show();
-            permissionGrant.onPermissionGranted(requestCode);
+            return false;
         }
     }
 
-    private static void requestMultiResult(Activity activity, String[] permissions, int[] grantResults, PermissionGrant permissionGrant) {
-
-        if (activity == null) {
-            return;
-        }
-
-        //TODO
-        Log.d(TAG, "onRequestPermissionsResult permissions length:" + permissions.length);
-        Map<String, Integer> perms = new HashMap<>();
-
-        ArrayList<String> notGranted = new ArrayList<>();
+    /**
+     * 检测多个权限
+     *
+     * @return 未授权的权限
+     */
+    public static List<String> checkMorePermissions(Context context, String[] permissions) {
+        List<String> permissionList = new ArrayList<>();
         for (int i = 0; i < permissions.length; i++) {
-            Log.d(TAG, "permissions: [i]:" + i + ", permissions[i]" + permissions[i] + ",grantResults[i]:" + grantResults[i]);
-            perms.put(permissions[i], grantResults[i]);
-            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                notGranted.add(permissions[i]);
+            if (!checkPermission(context, permissions[i])) {
+                permissionList.add(permissions[i]);
             }
         }
+        return permissionList;
+    }
 
-        if (notGranted.size() == 0) {
-            Toast.makeText(activity, "all permission success" + notGranted, Toast.LENGTH_SHORT)
-                    .show();
-            permissionGrant.onPermissionGranted(CODE_MULTI_PERMISSION);
+    /**
+     * 请求权限
+     */
+    public static void requestPermission(Context context, String permission, int requestCode) {
+        ActivityCompat.requestPermissions((Activity) context, new String[]{permission}, requestCode);
+    }
+
+    /**
+     * 请求多个权限
+     */
+    public static void requestMorePermissions(Context context, List permissionList, int requestCode) {
+        String[] permissions = (String[]) permissionList.toArray(new String[permissionList.size()]);
+        requestMorePermissions(context, permissions, requestCode);
+    }
+
+    /**
+     * 请求多个权限
+     */
+    public static void requestMorePermissions(Context context, String[] permissions, int requestCode) {
+        ActivityCompat.requestPermissions((Activity) context, permissions, requestCode);
+    }
+
+    /**
+     * 判断是否已拒绝过权限，如果应用之前请求过此权限但用户拒绝，此方法将返回 true;
+     * 如果应用第一次请求权限或 用户在过去拒绝了权限请求，
+     * 并在权限请求系统对话框中选择了 Don't ask again 选项，此方法将返回 false。
+     *
+     * @return 曾经是否拒绝过该权限
+     */
+    public static boolean judgePermission(Context context, String permission) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, permission)) {
+            return true;
         } else {
-            openSettingActivity(activity, "those permission need granted!");
+            return false;
         }
+    }
 
+    /**
+     * 检测权限并请求权限：如果没有权限，则请求权限
+     */
+    public static void checkAndRequestPermission(Context context, String permission, int requestCode) {
+        if (!checkPermission(context, permission)) {
+            requestPermission(context, permission, requestCode);
+        }
+    }
+
+    /**
+     * 检测并请求多个权限
+     */
+    public static void checkAndRequestMorePermissions(Context context, String[] permissions, int requestCode) {
+        List<String> permissionList = checkMorePermissions(context, permissions);
+        requestMorePermissions(context, permissionList, requestCode);
     }
 
 
     /**
-     * 一次申请多个权限
+     * 检测权限
      */
-    public static void requestMultiPermissions(final Activity activity, PermissionGrant grant) {
-
-        final List<String> permissionsList = getNoGrantedPermission(activity, false);
-        final List<String> shouldRationalePermissionsList = getNoGrantedPermission(activity, true);
-
-        //TODO checkSelfPermission
-        if (permissionsList == null || shouldRationalePermissionsList == null) {
-            return;
-        }
-        Log.d(TAG, "requestMultiPermissions permissionsList:" + permissionsList.size() + ",shouldRationalePermissionsList:" + shouldRationalePermissionsList.size());
-
-        if (permissionsList.size() > 0) {
-            ActivityCompat.requestPermissions(activity, permissionsList.toArray(new String[permissionsList.size()]),
-                    CODE_MULTI_PERMISSION);
-            Log.d(TAG, "showMessageOKCancel requestPermissions");
-
-        } else if (shouldRationalePermissionsList.size() > 0) {
-            showMessageOKCancel(activity, "should open those permission",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(activity, shouldRationalePermissionsList.toArray(new String[shouldRationalePermissionsList.size()]),
-                                    CODE_MULTI_PERMISSION);
-                            Log.d(TAG, "showMessageOKCancel requestPermissions");
-                        }
-                    });
+    public static void checkPermission(Context context, String permission, PermissionCheckCallBack callBack) {
+        // 用户已授予权限
+        if (checkPermission(context, permission)) {
+            callBack.onHasPermission();
         } else {
-            grant.onPermissionGranted(CODE_MULTI_PERMISSION);
-        }
-
-    }
-
-
-    private static void shouldShowRationale(final Activity activity, final int requestCode, final String requestPermission) {
-        //TODO
-        String[] permissionsHint = activity.getResources().getStringArray(R.array.permissions);
-        showMessageOKCancel(activity, "Rationale: " + permissionsHint[requestCode], new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{requestPermission},
-                        requestCode);
-                Log.d(TAG, "showMessageOKCancel requestPermissions:" + requestPermission);
+            // 用户之前已拒绝过权限申请
+            if (judgePermission(context, permission)) {
+                callBack.onUserHasAlreadyTurnedDown(permission);
+            } else {
+                // 用户之前已拒绝并勾选了不在询问、用户第一次申请权限。
+                callBack.onUserHasAlreadyTurnedDownAndDontAsk(permission);
             }
-        });
-    }
-
-    private static void showMessageOKCancel(final Activity context, String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(context)
-                .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
-                .create()
-                .show();
-
+        }
     }
 
     /**
-     * @param activity
-     * @param requestCode  Need consistent with requestPermission
-     * @param permissions
-     * @param grantResults
+     * 检测多个权限
      */
-    public static void requestPermissionsResult(final Activity activity, final int requestCode, @NonNull String[] permissions,
-                                                @NonNull int[] grantResults, PermissionGrant permissionGrant) {
-
-        if (activity == null) {
-            return;
-        }
-        Log.d(TAG, "requestPermissionsResult requestCode:" + requestCode);
-
-        if (requestCode == CODE_MULTI_PERMISSION) {
-            requestMultiResult(activity, permissions, grantResults, permissionGrant);
-            return;
-        }
-
-        if (requestCode < 0 || requestCode >= requestPermissions.length) {
-            Log.w(TAG, "requestPermissionsResult illegal requestCode:" + requestCode);
-            Toast.makeText(activity, "illegal requestCode:" + requestCode, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Log.i(TAG, "onRequestPermissionsResult requestCode:" + requestCode + ",permissions:" + permissions.toString()
-                + ",grantResults:" + grantResults.toString() + ",length:" + grantResults.length);
-
-        if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "onRequestPermissionsResult PERMISSION_GRANTED");
-            //TODO success, do something, can use callback
-            permissionGrant.onPermissionGranted(requestCode);
-
+    public static void checkMorePermissions(Context context, String[] permissions, PermissionCheckCallBack callBack) {
+        List<String> permissionList = checkMorePermissions(context, permissions);
+        // 用户已授予权限
+        if (permissionList.size() == 0) {
+            callBack.onHasPermission();
         } else {
-            //TODO hint user this permission function
-            Log.i(TAG, "onRequestPermissionsResult PERMISSION NOT GRANTED");
-            //TODO
-            String[] permissionsHint = activity.getResources().getStringArray(R.array.permissions);
-            openSettingActivity(activity, "Result" + permissionsHint[requestCode]);
-        }
-
-    }
-
-    private static void openSettingActivity(final Activity activity, String message) {
-
-        showMessageOKCancel(activity, message, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent();
-                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Log.d(TAG, "getPackageName(): " + activity.getPackageName());
-                Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
-                intent.setData(uri);
-                activity.startActivity(intent);
-            }
-        });
-    }
-
-
-    /**
-     * @param activity
-     * @param isShouldRationale true: return no granted and shouldShowRequestPermissionRationale permissions, false:return no granted and !shouldShowRequestPermissionRationale
-     * @return
-     */
-    public static ArrayList<String> getNoGrantedPermission(Activity activity, boolean isShouldRationale) {
-
-        ArrayList<String> permissions = new ArrayList<>();
-
-        for (int i = 0; i < requestPermissions.length; i++) {
-            String requestPermission = requestPermissions[i];
-
-
-            //TODO checkSelfPermission
-            int checkSelfPermission = -1;
-            try {
-                checkSelfPermission = ActivityCompat.checkSelfPermission(activity, requestPermission);
-            } catch (RuntimeException e) {
-                Toast.makeText(activity, "please open those permission", Toast.LENGTH_SHORT)
-                        .show();
-                Log.e(TAG, "RuntimeException:" + e.getMessage());
-                return null;
-            }
-
-            if (checkSelfPermission != PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "getNoGrantedPermission ActivityCompat.checkSelfPermission != PackageManager.PERMISSION_GRANTED:" + requestPermission);
-
-                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, requestPermission)) {
-                    Log.d(TAG, "shouldShowRequestPermissionRationale if");
-                    if (isShouldRationale) {
-                        permissions.add(requestPermission);
-                    }
-
-                } else {
-
-                    if (!isShouldRationale) {
-                        permissions.add(requestPermission);
-                    }
-                    Log.d(TAG, "shouldShowRequestPermissionRationale else");
+            boolean isFirst = true;
+            for (int i = 0; i < permissionList.size(); i++) {
+                String permission = permissionList.get(i);
+                if (judgePermission(context, permission)) {
+                    isFirst = false;
+                    break;
                 }
+            }
+            String[] unauthorizedMorePermissions = (String[]) permissionList.toArray(new String[permissionList.size()]);
+            // 用户之前已拒绝过权限申请
+            if (isFirst) {
+                callBack.onUserHasAlreadyTurnedDownAndDontAsk(unauthorizedMorePermissions);
+            } else {
+                // 用户之前已拒绝并勾选了不在询问、用户第一次申请权限。
+                callBack.onUserHasAlreadyTurnedDown(unauthorizedMorePermissions);
+            }
 
+        }
+    }
+
+
+    /**
+     * 检测并申请权限
+     */
+    public static void checkAndRequestPermission(Context context, String permission, int requestCode, PermissionRequestSuccessCallBack
+            callBack) {
+        // 用户已授予权限
+        if (checkPermission(context, permission)) {
+            callBack.onHasPermission();
+        } else {
+            requestPermission(context, permission, requestCode);
+        }
+    }
+
+    /**
+     * 检测并申请多个权限
+     */
+    public static void checkAndRequestMorePermissions(Context context, String[] permissions, int requestCode,
+                                                      PermissionRequestSuccessCallBack callBack) {
+        List<String> permissionList = checkMorePermissions(context, permissions);
+        // 用户已授予权限
+        if (permissionList.size() == 0) {
+            callBack.onHasPermission();
+        } else {
+            requestMorePermissions(context, permissionList, requestCode);
+        }
+    }
+
+    /**
+     * 判断权限是否申请成功
+     */
+    public static boolean isPermissionRequestSuccess(int[] grantResults) {
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 用户申请权限返回
+     */
+    public static void onRequestPermissionResult(Context context, String permission, int[] grantResults, PermissionCheckCallBack callback) {
+        if (PermissionUtils.isPermissionRequestSuccess(grantResults)) {
+            callback.onHasPermission();
+        } else {
+            if (PermissionUtils.judgePermission(context, permission)) {
+                callback.onUserHasAlreadyTurnedDown(permission);
+            } else {
+                callback.onUserHasAlreadyTurnedDownAndDontAsk(permission);
+            }
+        }
+    }
+
+    /**
+     * 用户申请多个权限返回
+     */
+    public static void onRequestMorePermissionsResult(Context context, String[] permissions, PermissionCheckCallBack callback) {
+        boolean isBannedPermission = false;
+        List<String> permissionList = checkMorePermissions(context, permissions);
+        if (permissionList.size() == 0) {
+            callback.onHasPermission();
+        } else {
+            for (int i = 0; i < permissionList.size(); i++) {
+                if (!judgePermission(context, permissionList.get(i))) {
+                    isBannedPermission = true;
+                    break;
+                }
+            }
+            //　已禁止再次询问权限
+            if (isBannedPermission) {
+                callback.onUserHasAlreadyTurnedDownAndDontAsk(permissions);
+            } else { // 拒绝权限
+                callback.onUserHasAlreadyTurnedDown(permissions);
             }
         }
 
-        return permissions;
     }
 
+
+    /**
+     * 跳转到权限设置界面
+     */
+    public static void toAppSetting(Context context) {
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= 9) {
+            intent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+            intent.setData(Uri.fromParts("package", context.getPackageName(), null));
+        } else if (Build.VERSION.SDK_INT <= 8) {
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setClassName("com.android.settings", "com.android.settings.InstalledAppDetails");
+            intent.putExtra("com.android.settings.ApplicationPkgName", context.getPackageName());
+        }
+        context.startActivity(intent);
+    }
+
+    public interface PermissionRequestSuccessCallBack {
+        /**
+         * 用户已授予权限
+         */
+        void onHasPermission();
+    }
+
+
+    public interface PermissionCheckCallBack {
+
+        /**
+         * 用户已授予权限
+         */
+        void onHasPermission();
+
+        /**
+         * 用户已拒绝过权限
+         *
+         * @param permission:被拒绝的权限
+         */
+        void onUserHasAlreadyTurnedDown(String... permission);
+
+        /**
+         * 用户已拒绝过并且已勾选不再询问选项、用户第一次申请权限;
+         *
+         * @param permission:被拒绝的权限
+         */
+        void onUserHasAlreadyTurnedDownAndDontAsk(String... permission);
+    }
 }
