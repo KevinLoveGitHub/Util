@@ -31,11 +31,11 @@ public class ExecutorHelpers {
     private final ExecutorService diskIO;
 
     private static class ThreadPoolHelpersHolder {
-        private static final ExecutorHelpers INSTANCE = new ExecutorHelpers();
-    }
+            private static final ExecutorHelpers INSTANCE = new ExecutorHelpers();
+        }
 
-    public static final ExecutorHelpers getInstance() {
-        return ThreadPoolHelpersHolder.INSTANCE;
+        public static final ExecutorHelpers getInstance() {
+            return ThreadPoolHelpersHolder.INSTANCE;
     }
 
     private ExecutorHelpers() {
