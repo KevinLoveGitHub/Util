@@ -1,4 +1,4 @@
-package org.lovedev.webrtc;
+package org.lovedev.util;
 
 import android.app.Activity;
 import android.content.Context;
