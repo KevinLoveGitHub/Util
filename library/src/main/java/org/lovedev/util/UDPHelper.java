@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author Kevin
@@ -17,6 +18,13 @@ public class UDPHelper {
     private static final String TAG = "UDPHelper";
 
     public static void sendUDPMessage(final String message, final String address, final int port) {
+        int activeCount = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getActiveCount();
+        int corePoolSize = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getCorePoolSize();
+        int largestPoolSize = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getLargestPoolSize();
+        long taskCount = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getTaskCount();
+
+        LogUtils.i(TAG, "activeCount: " + activeCount + " corePoolSize: " + corePoolSize + " largestPoolSize: " + largestPoolSize + " " +
+                "taskCount: " + taskCount);
         ExecutorHelpers.getNetworkIO().execute(new Runnable() {
 
             @Override

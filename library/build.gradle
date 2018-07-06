@@ -18,14 +18,27 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+    }
+
+    testOptions {
+        // 设置该属性时应该格外注意，因为在 test 中调用 Android 的 API 会抛出异常
+        // 把该属性设置成 true 时，调用 Android API 出现异常时就会返回默认值 null/0，此时测试就会通过，同时也有可能让失败的测试通过
+        unitTests.returnDefaultValues = false
     }
 }
 
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'junit:junit:4.12'
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation files('libs/commons-net-3.6-ftp.jar')
+
+    androidTestImplementation 'com.android.support:support-annotations:27.1.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
 }
 
 task getConfigurationByName << {
