@@ -53,7 +53,7 @@ public class UDPHelper {
 
 
     public static void openUDPPort(final int port, final UDPMessageListener listener) {
-        ExecutorHelpers.getNetworkIO().execute(new Runnable() {
+        ExecutorHelpers.getNewCachedThreadPool().execute(new Runnable() {
             DatagramSocket mDatagramSocket;
 
             @Override
