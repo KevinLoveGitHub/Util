@@ -51,6 +51,44 @@ public class UDPHelper {
         });
     }
 
+    public static void sendUDPMessage(final String message, final String address, final int port, final MessageListener listener) {
+        int activeCount = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getActiveCount();
+        int corePoolSize = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getCorePoolSize();
+        int largestPoolSize = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getLargestPoolSize();
+        long taskCount = ((ThreadPoolExecutor) ExecutorHelpers.getNetworkIO()).getTaskCount();
+
+        LogUtils.i(TAG, "activeCount: " + activeCount + " corePoolSize: " + corePoolSize + " largestPoolSize: " + largestPoolSize + " " +
+                "taskCount: " + taskCount);
+        ExecutorHelpers.getNetworkIO().execute(new Runnable() {
+
+            @Override
+            public void run() {
+                LogUtils.d(TAG, "sendUDPMessage: " + message + " : " + address + " : " + port);
+                byte[] buf = message.getBytes();
+                DatagramSocket sendSocket = null;
+                try {
+                    sendSocket = new DatagramSocket();
+                    InetAddress serverAddr = InetAddress.getByName(address);
+                    DatagramPacket outPacket = new DatagramPacket(buf, buf.length, serverAddr, port);
+                    sendSocket.send(outPacket);
+                    listener.onComplete();
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                    listener.onError(e);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                    listener.onError(e);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    listener.onError(e);
+                }
+                if (sendSocket != null) {
+                    sendSocket.close();
+                }
+            }
+        });
+    }
+
 
     public static void openUDPPort(final int port, final UDPMessageListener listener) {
         ExecutorHelpers.getNewCachedThreadPool().execute(new Runnable() {
@@ -93,4 +131,21 @@ public class UDPHelper {
         void onError(Exception e);
     }
 
+    /**
+     * 发送消息的回调方法
+     */
+    public interface MessageListener {
+
+        /**
+         * 发送完成
+         */
+        void onComplete();
+
+        /**
+         * 发送出错
+         *
+         * @param e 错误信息
+         */
+        void onError(Exception e);
+    }
 }
