@@ -68,7 +68,7 @@ public class ExecutorHelpers {
         return getInstance().newCachedThreadPool;
     }
 
-    public static MainThreadExecutor getMainThread() {
+    public static Executor getMainThread() {
         return getInstance().mainThread;
     }
 

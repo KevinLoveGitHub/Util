@@ -1,3 +1,13 @@
 <resources>
-	<string name="app_name">Util</string>
+	<string name="day">Day</string>
+	<string name="hour">Hour</string>
+	<string name="minute">Minute</string>
+	<string name="second">Second</string>
+	<string name="millisecond">millisecond</string>
+	<string name="just_now">Just Now</string>
+
+	<string name="day_ago"> Day</string>
+	<string name="hour_ago"> Hour</string>
+	<string name="minute_ago"> Minute</string>
+	<string name="second_ago"> Second</string>
 </resources>

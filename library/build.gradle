@@ -4,7 +4,7 @@ apply plugin: 'com.jfrog.bintray'
 group = 'org.lovedev'
 //发布到JCenter上的项目名字，必须填写
 def libName = 'Util'
-version = '0.0.5'
+version = '0.0.9'
 // 根节点添加
 def siteUrl = 'http://lovedev.org'    // project homepage
 def gitUrl = 'https://github.com/KevinLoveGitHub/Util.git' // project git
@@ -12,7 +12,7 @@ def gitUrl = 'https://github.com/KevinLoveGitHub/Util.git' // project git
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    buildToolsVersion '28.0.3'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 26
@@ -35,7 +35,6 @@ dependencies {
     androidTestImplementation 'junit:junit:4.12'
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation files('libs/commons-net-3.6-ftp.jar')
-
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
