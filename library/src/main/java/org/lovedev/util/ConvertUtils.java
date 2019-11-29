@@ -27,7 +27,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * @author Kevin
- * @data 2017/10/21
+ * @date 2017/10/21
  */
 public class ConvertUtils {
     private ConvertUtils() {

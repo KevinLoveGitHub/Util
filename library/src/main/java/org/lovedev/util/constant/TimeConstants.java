@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * @author Kevin
- * @data 2017/10/21
+ * @date 2017/10/21
  */
 public class TimeConstants {
     /**

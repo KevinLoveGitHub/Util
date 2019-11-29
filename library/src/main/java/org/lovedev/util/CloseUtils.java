@@ -5,7 +5,7 @@ import java.io.IOException;
 
 /**
  * @author Kevin
- * @data 2017/10/21
+ * @date 2017/10/21
  */
 public class CloseUtils {
 

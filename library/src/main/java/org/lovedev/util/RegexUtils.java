@@ -5,9 +5,10 @@ import java.util.regex.Pattern;
 
 /**
  * @author Kevin
- * @data 2018/5/17
+ * @date 2018/5/17
  */
 public class RegexUtils {
+    private static Pattern CONTAIN_CHINESE = Pattern.compile("[\u4e00-\u9fa5]");
 
     private RegexUtils() {
         throw new UnsupportedOperationException("cannot be instantiated");
@@ -18,5 +19,10 @@ public class RegexUtils {
         Pattern pattern = Pattern.compile(ip);
         Matcher matcher = pattern.matcher(ipAddress);
         return matcher.matches();
+    }
+
+    public static boolean isContainChinese(String str) {
+        Matcher m = CONTAIN_CHINESE.matcher(str);
+        return m.find();
     }
 }

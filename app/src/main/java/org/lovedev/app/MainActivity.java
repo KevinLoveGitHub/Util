@@ -1,9 +1,17 @@
 package org.lovedev.app;
 
+import android.Manifest;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.view.View;
 
-import org.lovedev.util.LogUtils;
+import java.io.File;
+
+import top.zibin.luban.CompressionPredicate;
+import top.zibin.luban.Luban;
+import top.zibin.luban.OnCompressListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -11,14 +19,38 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        LogUtils.i("{\"eventType\":10044,\"roomid\":\"1533178646194\",\"action\":\"call\",\"clientmac\":\"E064172810243\"," +
-                "\"data\":{\"devicemac\":\"E064172810243\",\"devicename\":\"8床\",\"nursename\":\"王璐璐\",\"departname\":\"内一科护士站\"," +
-                "\"incall\":\"0\",\"patientgroup\":\"\",\"levelid\":\"1\",\"infusion\":\"-1\",\"age\":\"79岁\",\"roomid\":\"7822\"," +
-                "\"starttime\":0,\"departid\":\"\",\"patienttime\":\"2018-01-11\",\"patientid\":\"0000122508\",\"online\":1," +
-                "\"type\":\"18\",\"roomname\":\"3病房\",\"bednum\":\"8床\",\"department\":\"\",\"nurseid\":\"24084\"," +
-                "\"mac\":\"E064172810243\",\"levelname\":\"一级护理\",\"levelbgcolor\":\"#d7181f\",\"deviceid\":3670,\"doctorid\":\"\"," +
-                "\"servicetype\":3,\"doctorname\":\"李敬奇\",\"username\":\"许德福\",\"levelcolor\":\"#ffffff\",\"ip\":\"10.0.1.214_3\"," +
-                "\"sex\":\"1\",\"deviceip\":\"10.0.1.214_3\"},\"clientip\":\"10.0.1.214_3\",\"answered\":0,\"stationip\":\"10.0.1.101\"," +
-                "\"clienttype\":\"18\",\"stationmac\":\"3CD16E380785\",\"sender\":\"station\",\"holdingtime\":0,\"clientname\":\"8床\"} ");
+        String[] strings = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        ActivityCompat.requestPermissions(this, strings, 100);
+        findViewById(R.id.btn_start).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Luban.with(getApplicationContext())
+                        .load("/sdcard/1.png")
+                        .ignoreBy(100)
+                        .setTargetDir("/sdcard")
+                        .filter(new CompressionPredicate() {
+                            @Override
+                            public boolean apply(String path) {
+                                return !(TextUtils.isEmpty(path) || path.toLowerCase().endsWith(".gif"));
+                            }
+                        })
+                        .setCompressListener(new OnCompressListener() {
+                            @Override
+                            public void onStart() {
+                                // TODO 压缩开始前调用，可以在方法内启动 loading UI
+                            }
+
+                            @Override
+                            public void onSuccess(File file) {
+                                // TODO 压缩成功后调用，返回压缩后的图片文件
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                // TODO 当压缩过程出现问题时调用
+                            }
+                        }).launch();
+            }
+        });
     }
 }

@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 
 /**
  * @author Kevin
- * @data 2018/7/4
+ * @date 2018/7/4
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest

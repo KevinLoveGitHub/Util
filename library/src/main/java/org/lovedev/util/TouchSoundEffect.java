@@ -10,7 +10,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 /**
  * @author Kevin
- * @data 2018/5/17
+ * @date 2018/5/17
  */
 public class TouchSoundEffect {
 
